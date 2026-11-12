@@ -1,3 +1,57 @@
 from django.db import models
+from django.contrib.auth.models import User, AbstractBaseUser
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 
+from utils.models import BaseModel
+from accounts.manager import UserManager
+from django.utils import timezone
 # Create your models here.
+
+
+
+# custom user model
+class CustomUser(AbstractBaseUser, PermissionsMixin, BaseModel):
+    CHOICE = [
+        ("admin", "Admin"),
+        ("staff", "Staff"),
+        ("user", "User"),
+    ]
+    
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    email = models.EmailField(unique=True)
+    role = models.CharField(max_length=10, choices=CHOICE, null=True, blank=True)
+    
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+    is_verified = models.BooleanField(default=False)
+    
+    objects = UserManager()
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["first_name", "last_name"]
+    
+    def save(self, *args, **kwargs):
+        if not self._state.adding:   # means UPDATE
+            old = CustomUser.objects.get(pk=self.pk)
+            if old.role != self.role:
+                raise ValueError("Role cannot be changed once set.")
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} ({self.email})"
+
+    def get_full_name(self):
+        return f"{self.first_name} {self.last_name}"
+        
+
+    class Meta:
+        ordering = ["-created_at"]
+
+        indexes = [
+            models.Index(
+                fields=["role"],
+                name="user_role_idx",
+            ),
+        ]
+

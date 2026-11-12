@@ -19,13 +19,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-9i%2_r*j#ao9yrhzg1t*4*6tpykc#xmn@32w5!jxzsjb0-uts)'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -39,9 +32,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+# package
+INSTALLED_APPS += [
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "django_filters", # for filtering
+
+]
+
+# install apps
 INSTALLED_APPS += [
     "accounts",
-
+    "authentication",
+    "audit",
 ]
 
 
@@ -60,10 +64,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'ResolveAI.urls'
 
+import os
+TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATES_DIR],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,3 +140,41 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+"""____________Config Or Overwrite Settings__________"""
+from decouple import config, Csv
+
+"""Django Config"""
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = config("DJANGO_SECRET_KEY")
+
+# one time url Sig token
+TOKEN_SIGNING_KEY = config("TOKEN_SIGNING_KEY")
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = config("DEBUG", default=False, cast=bool)
+
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
+
+# Default User Model
+AUTH_USER_MODEL = "accounts.CustomUser"
+
+
+
+
+"""DRF Config"""
+from config.drf_config import REST_FRAMEWORK
+
+
+
+"""JWT Cookie Config"""
+# Cookie age config
+from config.cookie_config import COOKIE_MAX_AGE
+
+# Simple JWT token config
+from config.jwt_config import SIMPLE_JWT
+
+"""CSRF Config"""
+from config.csrf_config import *
+
