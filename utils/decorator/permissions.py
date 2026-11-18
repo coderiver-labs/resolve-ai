@@ -18,4 +18,4 @@ def default_allow_admin_and_superuser(method):
             return True
         return method(self, request, view, action)
     return _impl
- 
+

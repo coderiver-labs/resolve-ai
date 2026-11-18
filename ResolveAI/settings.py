@@ -155,11 +155,31 @@ TOKEN_SIGNING_KEY = config("TOKEN_SIGNING_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
+# Allow HOSTS
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=Csv())
+
+# fronted URL
+FRONTEND_URL = str(config("FRONTEND_URL"))
 
 # Default User Model
 AUTH_USER_MODEL = "accounts.CustomUser"
 
+
+
+# """Email Configure"""
+# # email config
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = config("EMAIL_HOST")
+# EMAIL_PORT = config("EMAIL_PORT", cast=int)
+# EMAIL_USE_TLS = config("EMAIL_USE_TLS", cast=bool)
+# EMAIL_HOST_USER = config("EMAIL_HOST_USER")
+# EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
+
+
+
+
+"""Email Configure"""
+from config.mail_config import MAILERS
 
 
 
@@ -178,3 +198,5 @@ from config.jwt_config import SIMPLE_JWT
 """CSRF Config"""
 from config.csrf_config import *
 
+"""RabbitMQ Or Celery Configure"""
+from config.celery_config import *

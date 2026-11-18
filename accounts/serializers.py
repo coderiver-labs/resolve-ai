@@ -16,6 +16,8 @@ from accounts.models import CustomUser
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        exclude = ["password"]
+        fields = "__all__"
         read_only_fields = ["is_superuser", "is_staff", "is_verified", "is_active"]
+        extra_kwargs = {"password": {"write_only": True},}
+
 

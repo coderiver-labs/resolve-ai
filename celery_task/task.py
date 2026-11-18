@@ -28,9 +28,6 @@ from datetime import timedelta
 # import python
 from decouple import config
 
-# email verify sending task
-
-
 # account verify mail
 @shared_task()
 def celery_send_verify_mail(user_uuid:str, purpose:str):

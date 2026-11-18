@@ -21,7 +21,8 @@ from accounts.models import CustomUser
 
 # auth
 from auth.cookies import CookieHandler, AuthCookieService
-from auth.validators import verify_one_time_token
+from auth.validators import verify_one_time_token, validate_refresh_token
+
 
 # validator
 from authentication.services.validations import verify_user
@@ -96,6 +97,25 @@ class LoginAPIView(PublicGenericAPIView):
 
 
 
+class LogoutGenericAPIView(BaseGenericApiView):
+    """
+    LogoutAPI is a public API for user logout.
+    - This API uses a **POST request**
+    - On successful logout, authentication cookies will be cleared from the response.
+    - Rate Limit: Maximum 10 requests per minute per IP
+    """
+
+    serializer_class = DummySerializer
+
+    def post(self, request):
+        response = Response({"message": "Logout successfully"}, status=status.HTTP_200_OK)
+        cookie = CookieHandler(request=request, user=request.user, response=response)
+        cookie.delete_token()
+        return cookie.get_response()
+
+
+    
+
 class GetCSRFToken(CSRFCookieMixin, PublicGenericAPIView):
     """
     GetCsrfToken is a public API for retrieving a CSRF token.
@@ -113,6 +133,28 @@ class GetCSRFToken(CSRFCookieMixin, PublicGenericAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
+class GetAccessTOkenAPI(PublicGenericAPIView):
+    """
+    Issue a new access token from a valid refresh token and set it as a secure cookie.
+
+    - Purpose: validate an incoming refresh token, generate a new access token,
+      and attach that access token to the response as an HTTP-only secure cookie.
+      can easily follow the flow and understand CookieHandler usage.
+    - Behavior:
+        * Validates refresh token (via validate_refresh_token).
+        * Creates a Response containing a success message or token payload.
+        * Uses CookieHandler to set the access token cookie and returns the final response.
+    - Authentication: public endpoint that accepts a refresh token (usually sent via cookie).
+    - Response: returns the response produced by CookieHandler (cookie set + JSON body).
+    """
+    def post(self, request):
+        token = validate_refresh_token(request=request)
+        response = Response({"access_token": "new access token set successfully"})
+        cookie = CookieHandler(request=request, response=response)
+        cookie.set_access_token(str(token.access_token))
+        return cookie.get_response()
+
+    
 
 class VerifyAccountAPI(PublicGenericAPIView):
     """
@@ -130,7 +172,9 @@ class VerifyAccountAPI(PublicGenericAPIView):
         task = cast(Task, celery_verify_success_mail)
         task.delay(user_uuid=str(user.uuid))
         return Response({"verify": "account verify successfully"})
-    
+
+
+
 class ResendVerificationEmailAPI(PublicGenericAPIView):
     """
     ResendVerificationEmailAPI is a public API for resending account verification emails.

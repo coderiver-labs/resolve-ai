@@ -74,7 +74,7 @@ class LoginUserSerializer(serializers.Serializer):
     def validate_email(self, value: str) -> str:
         return value.strip().lower()
 
-    def validate(self, attrs):
+    def validate(self, attrs: dict):
         email = attrs.get("email")
         password = attrs.get("password")
         user = authenticate(email=email, password=password)

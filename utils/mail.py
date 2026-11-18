@@ -10,10 +10,10 @@ from django.core.mail import BadHeaderError
 from rest_framework.exceptions import ValidationError as DRFValidationError
 
 
-
-
+# create mail utils 
 
 def send_email(*, to: List[str], subject: str, template: str, context: Dict, request: Optional[object] = None) -> None:
+
     """
     Universal HTML email sender.
     - to: list of recipient emails
@@ -23,9 +23,17 @@ def send_email(*, to: List[str], subject: str, template: str, context: Dict, req
     """
 
     try:
-        from_email = settings.EMAIL_HOST_USER
+        from_email = settings.MAILERS["default"]["OPTIONS"]["username"]
+        
         html_content = render_to_string(template, context)
-        email = EmailMultiAlternatives(subject=subject, body="", from_email=from_email, to=to)
+
+        email = EmailMultiAlternatives(
+            subject=subject,
+            body="",
+            from_email=from_email,
+            to=to,
+        )
+
         email.attach_alternative(html_content, "text/html")
         email.send()
 
@@ -33,6 +41,4 @@ def send_email(*, to: List[str], subject: str, template: str, context: Dict, req
         raise BadHeaderError("Invalid email header")
 
     except Exception as e:
-        raise Exception(f"Email sending failed | {str(e)}")
-
-
+        raise Exception(f"Email sending failed | {str(e)}") from e

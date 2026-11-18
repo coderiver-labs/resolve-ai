@@ -1,10 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import User, AbstractBaseUser
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
-
-from utils.models import BaseModel
-from accounts.manager import UserManager
 from django.utils import timezone
+
+# base models
+from accounts.base_model import BaseProfileModel
+
+# core
+from accounts.manager import UserManager
+
+# utils 
+from utils.models import BaseModel
+
 # Create your models here.
 
 
@@ -55,3 +62,40 @@ class CustomUser(AbstractBaseUser, PermissionsMixin, BaseModel):
             ),
         ]
 
+
+
+
+"""___________profiles____________"""
+
+#  user profile model
+class UserProfile(BaseProfileModel):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="user_profile")
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+    
+    class Meta:
+        ordering = ["-created_at"]
+
+
+
+#  user profile model
+class StaffProfile(BaseProfileModel):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="staff_profile")
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+    
+    class Meta:
+        ordering = ["-created_at"]
+
+
+#  user profile model
+class AdminProfile(BaseProfileModel):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="admin_profile")
+
+    def __str__(self):
+        return f"{self.user.first_name} {self.user.last_name}"
+    
+    class Meta:
+        ordering = ["-created_at"]
