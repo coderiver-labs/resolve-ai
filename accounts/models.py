@@ -24,10 +24,19 @@ class CustomUser(AbstractBaseUser, PermissionsMixin, BaseModel):
         ("user", "User"),
     ]
     
+    GENDER_CHOICES = [
+        ("F", "Female"),
+        ("M", "Male"),
+        ("O", "Other")
+    ]
+
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     role = models.CharField(max_length=10, choices=CHOICE, null=True, blank=True)
+
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    date_of_birth = models.DateField(null=True, blank=True)
     
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
